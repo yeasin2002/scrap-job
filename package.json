@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@types/puppeteer": "^7.0.4",
+    "dotenv": "^16.4.5",
     "puppeteer": "^23.9.0"
   }
 }
