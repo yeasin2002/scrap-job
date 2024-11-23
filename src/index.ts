@@ -1,27 +1,30 @@
 import puppeteer from "puppeteer";
-import { envs, sleep } from "./utils";
+import { sleep } from "./utils";
 
-import { scrapJobData, LoginOnLinkedin } from "./helpers";
+import { configPage, scrapJobData, LoginOnLinkedin } from "./helpers";
+import chalk from "chalk";
 
 const init = async () => {
   try {
     const browser = await puppeteer.launch({
       headless: false,
       defaultViewport: null,
+      timeout: 60000,
     });
 
     const page = await browser.newPage();
-    await page.setViewport({ width: 1080, height: 1024 });
+    await configPage(page);
 
     // Steps
     await LoginOnLinkedin(page);
-    await scrapJobData(page);
+    await sleep(2000);
+    await scrapJobData({ browser, page1: page });
 
     await sleep(10000);
     await browser.close();
   } catch (error: any) {
-    console.log("An Error Occurred : ", error?.message);
-    console.log(`==================================`);
+    console.log(chalk.red("An Error Occurred : "), error?.message);
+    console.log(chalk.yellow`==================================`);
     console.log(error);
   }
 };
