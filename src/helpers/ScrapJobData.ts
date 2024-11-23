@@ -10,16 +10,17 @@ interface arg {
 
 export const scrapJobData = async ({ browser, page1 }: arg) => {
   const page = await browser.newPage();
-  await page1.close();
+  // await page1.close();
   console.log(chalk.yellow("Scraping Page Loading.."));
   try {
     await page.goto(urls.jobPage, {
       waitUntil: ["load", "networkidle0"],
-      timeout: 60000,
     });
     console.log(chalk.yellow("Selecting UL elements"));
 
-    const ulElement = await page.$("ul.scaffold-layout__list-container");
+    const ulElement = await page.waitForSelector(
+      "ul.scaffold-layout__list-container"
+    );
 
     if (ulElement) {
       console.log("Found the <ul> element!");

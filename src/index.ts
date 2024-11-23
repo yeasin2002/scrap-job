@@ -9,7 +9,8 @@ const init = async () => {
     const browser = await puppeteer.launch({
       headless: false,
       defaultViewport: null,
-      timeout: 60000,
+      timeout: 3 * 60000,
+      slowMo: 250,
     });
 
     const page = await browser.newPage();
