@@ -23,6 +23,7 @@
     "puppeteer-extra-plugin-adblocker": "^2.13.6",
     "puppeteer-extra-plugin-devtools": "^2.4.6",
     "puppeteer-extra-plugin-minmax": "^1.1.2",
-    "puppeteer-extra-plugin-stealth": "^2.11.2"
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "user-agents": "^1.1.368"
   }
 }

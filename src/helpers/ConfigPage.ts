@@ -1,8 +1,15 @@
 import { Page } from "puppeteer";
+import userAgent from "user-agents";
 
 export const configPage = async (page: Page) => {
-  await page.setViewport({ width: 1080, height: 1024 });
-  await page.setUserAgent(
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
-  );
+  // await page.setViewport({ width: 1080, height: 1024 });
+  await page.setViewport({
+    width: 1920 + Math.floor(Math.random() * 100),
+    height: 3000 + Math.floor(Math.random() * 100),
+    deviceScaleFactor: 1,
+    hasTouch: false,
+    isLandscape: false,
+    isMobile: false,
+  });
+  await page.setUserAgent(userAgent.random().toString());
 };

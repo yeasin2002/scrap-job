@@ -1,7 +1,9 @@
 import puppeteer from "puppeteer-extra";
+import chalk from "chalk";
+
+//  puppeteer plugins
 import puppeteerStealthPlugin from "puppeteer-extra-plugin-stealth";
 import AdblockerPlugin from "puppeteer-extra-plugin-adblocker";
-import chalk from "chalk";
 import puppeteerMinmax from "puppeteer-extra-plugin-minmax";
 import devtools from "puppeteer-extra-plugin-devtools";
 
@@ -11,7 +13,7 @@ import { sleep } from "./utils";
 puppeteer.use(puppeteerStealthPlugin());
 puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 puppeteer.use(puppeteerMinmax());
-puppeteer.use(devtools);
+puppeteer.use(devtools());
 
 const main = async () => {
   try {
@@ -20,7 +22,6 @@ const main = async () => {
       defaultViewport: null,
       timeout: 3 * 60000,
       slowMo: 250,
-      // args: ["--proxy-server=103.78.54.10"],
     });
 
     const page = await browser.newPage();
@@ -28,8 +29,8 @@ const main = async () => {
 
     // Steps
     await LoginOnLinkedin(page);
-    await sleep(2000);
-    await scrapJobData({ browser, page1: page });
+    // await sleep(2000);
+    // await scrapJobData({ browser, page1: page });
 
     await sleep(10000);
     await browser.close();
