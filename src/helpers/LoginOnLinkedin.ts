@@ -7,7 +7,6 @@ export const LoginOnLinkedin = async (page: Page) => {
   await page.goto(urls.loginPage, {
     waitUntil: ["load", "networkidle0"],
   });
-  await page.waitForNetworkIdle();
 
   await page.locator("#username").fill(envs.linkedinEmail);
   await page.locator("#password").fill(envs.linkedinPassword);

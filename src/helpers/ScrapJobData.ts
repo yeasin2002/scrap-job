@@ -2,6 +2,7 @@ import path from "path";
 import { Browser, Page } from "puppeteer";
 import { urls } from "../utils";
 import chalk from "chalk";
+import ora from "ora";
 
 interface arg {
   browser: Browser;
@@ -9,19 +10,29 @@ interface arg {
 }
 
 export const scrapJobData = async ({ browser, page1 }: arg) => {
+  const spinner = ora("Initialized job scrapper").start();
   const page = await browser.newPage();
-  // await page1.close();
-  console.log(chalk.yellow("Scraping Page Loading.."));
+  spinner.text = "Scraping Page Loading..... ";
+
   try {
+    await page1.close();
     await page.goto(urls.jobPage, {
       waitUntil: ["load", "networkidle0"],
+      timeout: 3 * 60000,
     });
-    await page.waitForNetworkIdle();
+
+    spinner.text = "Loaded Job Page";
+
     console.log(chalk.yellow("Selecting UL elements"));
 
+    // const ulElement = await page.waitForSelector("ul.");
+    // const ulElement = await page.locator(".scaffold-layout__list-container").waitHandle();
     const ulElement = await page.waitForSelector(
-      "ul.scaffold-layout__list-container"
+      ".scaffold-layout__list-container",
+      { timeout: 30000 }
     );
+
+    spinner.text = "ul element selecting process completed";
 
     if (ulElement) {
       console.log("Found the <ul> element!");
@@ -29,10 +40,13 @@ export const scrapJobData = async ({ browser, page1 }: arg) => {
       // Optionally, extract the HTML content of the <ul>
       const ulHtml = await page.evaluate((el) => el.outerHTML, ulElement);
       console.log("HTML content of the <ul>:", ulHtml);
+      spinner.succeed("Found the <ul> element!");
     } else {
       console.log("<ul> element not found!");
+      spinner.fail("Failed to find the <ul> element!");
     }
   } catch (error: any) {
+    spinner.fail("En error occurred!");
     console.error(chalk.red("Error in scrapJobData: "), error?.message);
     console.log(chalk.yellow`==================================`);
 

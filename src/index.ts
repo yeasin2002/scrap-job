@@ -1,7 +1,7 @@
 import puppeteer from "puppeteer-extra";
 import chalk from "chalk";
 
-//  puppeteer plugins
+//  puppeteer's plugins
 import puppeteerStealthPlugin from "puppeteer-extra-plugin-stealth";
 import AdblockerPlugin from "puppeteer-extra-plugin-adblocker";
 import puppeteerMinmax from "puppeteer-extra-plugin-minmax";
@@ -21,7 +21,7 @@ const main = async () => {
       headless: false,
       defaultViewport: null,
       timeout: 3 * 60000,
-      slowMo: 250,
+      // slowMo: 250,
     });
 
     const page = await browser.newPage();
@@ -29,8 +29,8 @@ const main = async () => {
 
     // Steps
     await LoginOnLinkedin(page);
-    // await sleep(2000);
-    // await scrapJobData({ browser, page1: page });
+    await sleep(2000);
+    await scrapJobData({ browser, page1: page });
 
     await sleep(10000);
     await browser.close();
