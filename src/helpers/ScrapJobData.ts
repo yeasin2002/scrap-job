@@ -16,6 +16,7 @@ export const scrapJobData = async ({ browser, page1 }: arg) => {
     await page.goto(urls.jobPage, {
       waitUntil: ["load", "networkidle0"],
     });
+    await page.waitForNetworkIdle();
     console.log(chalk.yellow("Selecting UL elements"));
 
     const ulElement = await page.waitForSelector(
