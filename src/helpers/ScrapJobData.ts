@@ -2,67 +2,70 @@ import path from "path";
 import { Browser, Page } from "puppeteer";
 import chalk from "chalk";
 import ora from "ora";
-import fs from "fs";
 
 import { urls } from "../utils";
+import { getSpecificJobData, type LiData } from "./getSpecificJobData";
+import { JobData } from "../types";
 
 interface arg {
+  page: Page;
   browser: Browser;
-  page1: Page;
+  allJobsData: JobData[];
 }
 
-export const scrapJobData = async ({ browser, page1: page }: arg) => {
+export const scrapJobData = async ({
+  browser,
+  page: oldPage,
+  allJobsData,
+}: arg) => {
   const spinner = ora("Initialized job scrapper").start();
-  // const page = await browser.newPage();
   spinner.text = "Scraping Page Loading..... ";
 
-  page.on("requestfailed", (request) => {
-    console.error(`Request failed: ${request.url()}`);
-  });
+  const page = await browser.newPage();
+
+  // page.on("requestfailed", (request) => {
+  //   console.error(`Request failed: ${request.url()}`);
+  // });
 
   try {
-    // await page1.close();
+    await oldPage.close();
     await page.goto(urls.jobPage, {
       waitUntil: ["load"],
       timeout: 3 * 60000,
     });
 
-    spinner.text = "Loaded Job Page";
-
     console.log(chalk.yellow("Selecting UL elements"));
 
     const ulElement = await page.$("ul.scaffold-layout__list-container");
-
     spinner.text = "ul element selecting process completed";
 
     if (ulElement) {
       console.log("Found the <ul> element!");
-
-      type LiData = {
-        text: string;
-        link: string;
-        title: string;
-      };
+      spinner.succeed("Found the <ul> element!");
 
       const liData: LiData[] = await page.evaluate(() => {
-        // Select all <li> elements inside the <ul> with the specified class
         const lis = document.querySelectorAll<HTMLLIElement>(
           "ul.scaffold-layout__list-container > li"
         );
 
-        // Map through NodeList to extract relevant information
-        return Array.from(lis).map((li) => ({
-          text: li.textContent?.trim() || "", // Ensure textContent is not null
-          link: li.querySelector<HTMLAnchorElement>("a")?.href || "", // Extract the link if available
-          title:
-            li.querySelector<HTMLElement>(".job-title")?.textContent?.trim() ||
-            "", // Extract title if available
-        }));
+        return (
+          Array.from(lis).map((li) => ({
+            id: li.id,
+            dataOccludableJobId:
+              li.getAttribute("data-occludable-job-id") || "",
+            className:
+              li.getAttribute("class") ||
+              "ember-view   jobs-search-results__list-item occludable-update p0 relative scaffold-layout__list-item",
+          })) || []
+        );
       });
 
-      console.log("Extracted <li> data:", liData);
+      console.log(`Found ${liData.length} jobs`);
 
-      spinner.succeed("Found the <ul> element!");
+      // loop only 1st 5 jobs
+      for (let i = 0; i < 5; i++) {
+        await getSpecificJobData({ data: liData[i], page, allJobsData });
+      }
     } else {
       console.log("<ul> element not found!");
       spinner.fail("Failed to find the <ul> element!");
