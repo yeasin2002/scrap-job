@@ -1,23 +1,29 @@
 import path from "path";
 import { Browser, Page } from "puppeteer";
-import { urls } from "../utils";
 import chalk from "chalk";
 import ora from "ora";
+import fs from "fs";
+
+import { urls } from "../utils";
 
 interface arg {
   browser: Browser;
   page1: Page;
 }
 
-export const scrapJobData = async ({ browser, page1 }: arg) => {
+export const scrapJobData = async ({ browser, page1: page }: arg) => {
   const spinner = ora("Initialized job scrapper").start();
-  const page = await browser.newPage();
+  // const page = await browser.newPage();
   spinner.text = "Scraping Page Loading..... ";
 
+  page.on("requestfailed", (request) => {
+    console.error(`Request failed: ${request.url()}`);
+  });
+
   try {
-    await page1.close();
+    // await page1.close();
     await page.goto(urls.jobPage, {
-      waitUntil: ["load", "networkidle0"],
+      waitUntil: ["load"],
       timeout: 3 * 60000,
     });
 
@@ -25,26 +31,43 @@ export const scrapJobData = async ({ browser, page1 }: arg) => {
 
     console.log(chalk.yellow("Selecting UL elements"));
 
-    // const ulElement = await page.waitForSelector("ul.");
-    // const ulElement = await page.locator(".scaffold-layout__list-container").waitHandle();
-    const ulElement = await page.waitForSelector(
-      ".scaffold-layout__list-container",
-      { timeout: 30000 }
-    );
+    const ulElement = await page.$("ul.scaffold-layout__list-container");
 
     spinner.text = "ul element selecting process completed";
 
     if (ulElement) {
       console.log("Found the <ul> element!");
 
-      // Optionally, extract the HTML content of the <ul>
-      const ulHtml = await page.evaluate((el) => el.outerHTML, ulElement);
-      console.log("HTML content of the <ul>:", ulHtml);
+      type LiData = {
+        text: string;
+        link: string;
+        title: string;
+      };
+
+      const liData: LiData[] = await page.evaluate(() => {
+        // Select all <li> elements inside the <ul> with the specified class
+        const lis = document.querySelectorAll<HTMLLIElement>(
+          "ul.scaffold-layout__list-container > li"
+        );
+
+        // Map through NodeList to extract relevant information
+        return Array.from(lis).map((li) => ({
+          text: li.textContent?.trim() || "", // Ensure textContent is not null
+          link: li.querySelector<HTMLAnchorElement>("a")?.href || "", // Extract the link if available
+          title:
+            li.querySelector<HTMLElement>(".job-title")?.textContent?.trim() ||
+            "", // Extract title if available
+        }));
+      });
+
+      console.log("Extracted <li> data:", liData);
+
       spinner.succeed("Found the <ul> element!");
     } else {
       console.log("<ul> element not found!");
       spinner.fail("Failed to find the <ul> element!");
     }
+    return;
   } catch (error: any) {
     spinner.fail("En error occurred!");
     console.error(chalk.red("Error in scrapJobData: "), error?.message);

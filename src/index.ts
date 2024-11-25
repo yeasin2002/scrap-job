@@ -11,7 +11,7 @@ import { configPage, scrapJobData, LoginOnLinkedin } from "./helpers";
 import { sleep } from "./utils";
 
 puppeteer.use(puppeteerStealthPlugin());
-puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
+// puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 puppeteer.use(puppeteerMinmax());
 puppeteer.use(devtools());
 
@@ -21,6 +21,7 @@ const main = async () => {
       headless: false,
       defaultViewport: null,
       timeout: 3 * 60000,
+      dumpio: true,
       // slowMo: 250,
     });
 
