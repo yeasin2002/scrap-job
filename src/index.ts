@@ -10,6 +10,7 @@ import devtools from "puppeteer-extra-plugin-devtools";
 import { configPage, scrapJobData, LoginOnLinkedin } from "./helpers";
 import { sleep } from "./utils";
 import { JobData } from "./types";
+import path from "path";
 
 puppeteer.use(puppeteerStealthPlugin());
 puppeteer.use(puppeteerMinmax());
@@ -17,17 +18,17 @@ puppeteer.use(devtools());
 
 const main = async () => {
   const allJobsData: JobData[] = [];
+  const browser = await puppeteer.launch({
+    headless: false,
+    defaultViewport: null,
+    timeout: 3 * 60000,
+    dumpio: true,
+    // slowMo: 250,
+  });
+
+  const page = await browser.newPage();
 
   try {
-    const browser = await puppeteer.launch({
-      headless: false,
-      defaultViewport: null,
-      timeout: 3 * 60000,
-      dumpio: true,
-      // slowMo: 250,
-    });
-
-    const page = await browser.newPage();
     await configPage(page);
 
     // Steps
@@ -41,6 +42,13 @@ const main = async () => {
     console.log(chalk.red("An Error Occurred : "), error?.message);
     console.log(chalk.yellow`==================================`);
     console.log(error);
+
+    const logDir = path.resolve("log");
+    const timeNow = new Date().toISOString().replace(/[:.]/g, "-");
+    await page.screenshot({
+      path: path.join(logDir, `error-screenshot-${timeNow}.png`),
+      fullPage: true,
+    });
   } finally {
     console.log("🚀 All Jobs Data:", allJobsData);
   }

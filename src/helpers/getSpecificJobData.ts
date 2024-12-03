@@ -27,6 +27,10 @@ export const getSpecificJobData = async ({
     const jobTitleElement = await page.$(
       ".job-details-jobs-unified-top-card__job-title h1 a"
     );
+    const preferencesAndSkillAllList = page.locator(
+      ".job-details-preferences-and-skills div span"
+    );
+    console.log("🚀 ~ preferencesAndSkillAllList:", preferencesAndSkillAllList);
 
     // defining data values
     const jobTitle: string =
@@ -36,6 +40,6 @@ export const getSpecificJobData = async ({
 
     allJobsData.push({ title: jobTitle });
 
-    // await sleep(5000);
+    await sleep(5000);
   }
 };
